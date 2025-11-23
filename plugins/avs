@@ -1,3 +1,4 @@
+--1
 local toolbar = plugin:CreateToolbar("Anti-Virus tools")
 local scriptd = toolbar:CreateButton("Anti Virus", "Toggle Anti Virus","rbxassetid://92017337125696")
 local debuggingbutton = toolbar:CreateButton("Anti Virus debugging","Debugging menu","rbxassetid://84466696370514")

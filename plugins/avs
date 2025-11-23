@@ -1,0 +1,2055 @@
+local toolbar = plugin:CreateToolbar("Anti-Virus tools")
+local scriptd = toolbar:CreateButton("Anti Virus", "Toggle Anti Virus","rbxassetid://92017337125696")
+local debuggingbutton = toolbar:CreateButton("Anti Virus debugging","Debugging menu","rbxassetid://84466696370514")
+local selfdestruct = toolbar:CreateButton("Self-destruct","breaks scripts to update","rbxassetid://82424152484859")
+local ts = game:GetService("TweenService")
+local mps = game:GetService("MarketplaceService")
+local uis = game:GetService("UserInputService")
+local lcs = game:GetService("LocalizationService")
+local pluginvers = "241"
+local dobreakcoroutine = false
+local hereyougobreaker = nil
+local logo = [[ 
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+ ▄▄▄▄▄▄▄▄▄▄▄  ▄            ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄            ▄▄▄▄▄▄▄▄▄▄▄  ▄         ▄  ▄▄▄▄▄▄▄▄▄▄▄  ██          
+▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌ ██          
+▐░█▀▀▀▀▀▀▀▀▀ ▐░▌          ▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀  ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌ ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀ ▐░▌          ▐░█▀▀▀▀▀▀▀█░▌▐░▌       ▐░▌▐░█▀▀▀▀▀▀▀▀▀  ██          
+▐░▌          ▐░▌          ▐░▌          ▐░▌               ▐░▌     ▐░▌       ▐░▌     ▐░▌     ▐░▌          ▐░▌          ▐░▌          ▐░▌       ▐░▌▐░▌       ▐░▌▐░▌           ██          
+▐░█▄▄▄▄▄▄▄▄▄ ▐░▌          ▐░█▄▄▄▄▄▄▄▄▄ ▐░▌               ▐░▌     ▐░█▄▄▄▄▄▄▄█░▌     ▐░▌     ▐░▌          ▐░█▄▄▄▄▄▄▄▄▄ ▐░▌          ▐░▌       ▐░▌▐░▌   ▄   ▐░▌▐░█▄▄▄▄▄▄▄▄▄  ██          
+▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌▐░▌               ▐░▌     ▐░░░░░░░░░░░▌     ▐░▌     ▐░▌          ▐░░░░░░░░░░░▌▐░▌          ▐░▌       ▐░▌▐░▌  ▐░▌  ▐░▌▐░░░░░░░░░░░▌ ██          
+▐░█▀▀▀▀▀▀▀▀▀ ▐░▌          ▐░█▀▀▀▀▀▀▀▀▀ ▐░▌               ▐░▌     ▐░█▀▀▀▀█░█▀▀      ▐░▌     ▐░▌          ▐░█▀▀▀▀▀▀▀▀▀ ▐░▌          ▐░▌       ▐░▌▐░▌ ▐░▌░▌ ▐░▌ ▀▀▀▀▀▀▀▀▀█░▌ ██          
+▐░▌          ▐░▌          ▐░▌          ▐░▌               ▐░▌     ▐░▌     ▐░▌       ▐░▌     ▐░▌          ▐░▌          ▐░▌          ▐░▌       ▐░▌▐░▌▐░▌ ▐░▌▐░▌          ▐░▌ ██          
+▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄▄▄      ▐░▌     ▐░▌      ▐░▌  ▄▄▄▄█░█▄▄▄▄ ▐░█▄▄▄▄▄▄▄▄▄ ▐░▌          ▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄█░▌▐░▌░▌   ▐░▐░▌ ▄▄▄▄▄▄▄▄▄█░▌ ██          
+▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░▌     ▐░░▌▐░░░░░░░░░░░▌ ██          
+ ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀            ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀       ▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ██          
+                                                                                                                                                                          ██          
+ ▄▄▄▄▄▄▄▄▄▄▄  ▄▄        ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄      ▄               ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄         ▄  ▄▄▄▄▄▄▄▄▄▄▄                                            ██         
+▐░░░░░░░░░░░▌▐░░▌      ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌    ▐░▌             ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌                                           ██          
+▐░█▀▀▀▀▀▀▀█░▌▐░▌░▌     ▐░▌ ▀▀▀▀█░█▀▀▀▀  ▀▀▀▀█░█▀▀▀▀      ▐░▌           ▐░▌  ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░▌       ▐░▌▐░█▀▀▀▀▀▀▀▀▀                                            ██          
+▐░▌       ▐░▌▐░▌▐░▌    ▐░▌     ▐░▌          ▐░▌           ▐░▌         ▐░▌       ▐░▌     ▐░▌       ▐░▌▐░▌       ▐░▌▐░▌                                                     ██          
+▐░█▄▄▄▄▄▄▄█░▌▐░▌ ▐░▌   ▐░▌     ▐░▌          ▐░▌ ▄▄▄▄▄▄▄▄▄▄▄▐░▌       ▐░▌        ▐░▌     ▐░█▄▄▄▄▄▄▄█░▌▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄▄▄                                            ██          
+▐░░░░░░░░░░░▌▐░▌  ▐░▌  ▐░▌     ▐░▌          ▐░▌▐░░░░░░░░░░░▌▐░▌     ▐░▌         ▐░▌     ▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌                                           ██          
+▐░█▀▀▀▀▀▀▀█░▌▐░▌   ▐░▌ ▐░▌     ▐░▌          ▐░▌ ▀▀▀▀▀▀▀▀▀▀▀  ▐░▌   ▐░▌          ▐░▌     ▐░█▀▀▀▀█░█▀▀ ▐░▌       ▐░▌ ▀▀▀▀▀▀▀▀▀█░▌                                           ██         
+▐░▌       ▐░▌▐░▌    ▐░▌▐░▌     ▐░▌          ▐░▌               ▐░▌ ▐░▌           ▐░▌     ▐░▌     ▐░▌  ▐░▌       ▐░▌          ▐░▌                                           ██          
+▐░▌       ▐░▌▐░▌     ▐░▐░▌     ▐░▌      ▄▄▄▄█░█▄▄▄▄            ▐░▐░▌        ▄▄▄▄█░█▄▄▄▄ ▐░▌      ▐░▌ ▐░█▄▄▄▄▄▄▄█░▌ ▄▄▄▄▄▄▄▄▄█░▌ ▄                                         ██          
+▐░▌       ▐░▌▐░▌      ▐░░▌     ▐░▌     ▐░░░░░░░░░░░▌            ▐░▌        ▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌                                        ██          
+ ▀         ▀  ▀        ▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀              ▀          ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀ 										  ██
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+]]
+local warning_logo= [[
+				  █
+				 █ █
+				█	█
+			   █	 █
+			  █		  █
+			 █		   █
+			█			█
+		   █	  █		 █
+		  █		  █		  █
+		 █		  █		   █
+		█		  █			█
+	   █		  █			 █
+	  █			  █			  █
+	 █			  █			   █
+	█			  █				█
+   █							 █
+  █				  █				  █
+ █								   █
+█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+]]
+local void = DockWidgetPluginGuiInfo.new(
+	Enum.InitialDockState.Float,
+	false,
+	false,
+	0,
+	0,
+	0,
+	0
+)
+local function TranslateTextAsync(lang,text)
+	local LocalizationService = game:GetService("LocalizationService")
+	local success, translator = pcall(function()
+		return LocalizationService:GetTranslatorForLocaleAsync(lang)
+	end)
+	if success then
+		local result = translator:Translate(text, "Hello")
+		return result
+	else
+		print("GetTranslatorForLocaleAsync failed: " .. translator)
+	end
+end
+local spw = plugin:CreateDockWidgetPluginGui("SoundPlayerWidget", void)
+spw.Enabled = false
+spw.Name = "SoundHandler"
+local settingsss = plugin:GetSetting("Data_1") or {}
+local function UpdateSettings()
+	plugin:SetSetting("Data_1",settingsss)
+end
+local function getvers()
+	local y,r = pcall(function()
+		return mps:GetProductInfo(81396126331815).Description:match("Version%s*:%s*([%w%.%-]+)")
+	end)
+	if y then
+		return r
+	else
+		warn("Not loaded")
+		return false
+	end
+end
+local cooldown = false
+local activate = false
+local RunService = game:GetService("RunService")
+local versions = getvers()
+if pluginvers == versions then
+else
+	warn("Outdated version of plugin please change it")
+end
+local OnOff = false
+if not RunService:IsRunning() then
+	OnOff = true
+else
+	OnOff = false
+end
+local badword = {
+	"P".."o".."s".."t".."A".."s".."y".."n".."c",
+	"J".."S".."O".."N".."D".."e".."c".."o".."d".."e",
+	"J".."S".."O".."N".."E".."n".."c".."o".."d".."e",
+	"g".."e".."t".."f".."e".."n".."v",
+	"H".."t".."t".."p".."S".."e".."r".."v".."i".."c".."e",
+	"s".."e".."t".."f".."e".."n".."v",
+	"l".."o".."a".."d".."s".."t".."r".."i".."n".."g".."("
+}
+local attp = Instance.new("AudioTextToSpeech",spw)
+attp.VoiceId = 1
+attp.Volume = 1.5
+attp.PlaybackSpeed = 1.2
+local wire = Instance.new("Wire",spw)
+wire.SourceInstance = attp
+local deviceoutput = Instance.new("AudioDeviceOutput",spw)
+wire.TargetInstance = deviceoutput
+local function YTextTS(txt)
+	attp.Text = txt
+	attp:LoadAsync()
+	attp:Play()
+end
+local k = "ElectricWorks_Studios"
+local PopUpg = Instance.new("ScreenGui")
+local Here = Instance.new("Frame")
+local UIGridLayout = Instance.new("UIListLayout")
+PopUpg.Name = "PopUp"
+PopUpg.Parent = game.CoreGui
+PopUpg.DisplayOrder = 999
+PopUpg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Here.Name = "Here"
+Here.Parent = PopUpg
+Here.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Here.BackgroundTransparency = 1.000
+Here.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Here.BorderSizePixel = 0
+Here.Position = UDim2.new(0.803243995, 0, -2.08311107e-07, 0)
+Here.Size = UDim2.new(0.196614921, 0, 0.999317765, 0)
+UIGridLayout.Parent = Here
+UIGridLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+local function PopUp(Text,Bad)
+	if settingsss["Show PopUp"] == true then
+		task.spawn(function()
+			local PopUp_2 = Instance.new("Frame")
+			local UICorner = Instance.new("UICorner")
+			local Icon = Instance.new("ImageLabel")
+			local PlaySound = Instance.new("Sound")
+			local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+			local Title = Instance.new("TextLabel")
+			PlaySound.SoundId = "rbxassetid://17582299860"
+			PlaySound.Parent = spw
+			PopUp_2.Name = "PopUp"
+			PopUp_2.Parent = Here
+			PopUp_2.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
+			PopUp_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			PopUp_2.BorderSizePixel = 0
+			PopUp_2.Size = UDim2.new(0, 0, 0, 0)
+			if settingsss["Animations"] == true then
+				ts:Create(PopUp_2,TweenInfo.new(0.4,Enum.EasingStyle.Sine,Enum.EasingDirection.Out),{Size = UDim2.new(1, 0, 0, 60)}):Play()
+			end
+			UICorner.CornerRadius = UDim.new(0.200000003, 0)
+			UICorner.Parent = PopUp_2
+			Icon.Name = "Icon"
+			Icon.Parent = PopUp_2
+			Icon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			Icon.BackgroundTransparency = 1.000
+			Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Icon.BorderSizePixel = 0
+			Icon.Position = UDim2.new(0.0538020171, 0, 0.0833333358, 0)
+			Icon.Size = UDim2.new(0.182496399, 0, 0.833333313, 0)
+			Icon.Image = "rbxassetid://18460146845"
+			UIAspectRatioConstraint.Parent = Icon
+			Title.Name = "Title"
+			Title.Parent = PopUp_2
+			Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			Title.BackgroundTransparency = 1.000
+			Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Title.BorderSizePixel = 0
+			Title.Position = UDim2.new(0.254662454, 0, 0, 0)
+			Title.Size = UDim2.new(0.745336711, 0, 1, 0)
+			Title.Font = Enum.Font.Roboto
+			Title.TextColor3 = Color3.fromRGB(255,255,255)
+			Title.Text = tostring(Text)
+			Title.TextScaled = true
+			Title.TextSize = 14.000
+			Title.TextWrapped = true
+			Title.TextXAlignment = Enum.TextXAlignment.Left
+			if Bad == true then
+				ErrorSSound()
+				Title.TextColor3 = Color3.new(1,0,0)
+			else
+				PlaySound:Play()
+			end
+			task.wait(4)
+			if settingsss["Animations"] == true then
+				ts:Create(PopUp_2,TweenInfo.new(0.4,Enum.EasingStyle.Sine,Enum.EasingDirection.Out),{Size = UDim2.new(0, 0, 0, 60)}):Play()
+			end
+			task.wait(1)
+			PlaySound:Destroy()
+			PopUp_2:Destroy()
+		end)
+	end
+end
+if versions == pluginvers then
+else
+	PopUp("Your plugin version is outdated please use new version.")
+end
+local function CreateCacheFolder()
+	local Checking = game.ServerStorage:FindFirstChild("81396126331815_AntiVirus_Cache")
+	local Checker = game.ServerStorage:FindFirstChild("81396126331815_AntiVirus_Quarantine")
+	if not Checking then
+		local NewCacheFolder = Instance.new("Folder")
+		NewCacheFolder.Name = "81396126331815_AntiVirus_Cache"
+		NewCacheFolder.Parent = game.ServerStorage
+	end
+	if not Checker then
+		local NewQuarantFold = Instance.new("Folder")
+		NewQuarantFold.Name = "81396126331815_AntiVirus_Quarantine"
+		NewQuarantFold.Parent = game.ServerStorage
+	end
+end
+local function CreateInfraction(txt,path)
+	if not game.ServerStorage:FindFirstChild("81396126331815_AntiVirus_Cache") then
+		CreateCacheFolder()
+	end
+	if not game.ServerStorage["81396126331815_AntiVirus_Cache"]:FindFirstChild(path) then
+		local NewInfraction = Instance.new("StringValue")
+		NewInfraction.Name = path
+		NewInfraction.Value = txt
+		NewInfraction.Parent = game.ServerStorage["81396126331815_AntiVirus_Cache"]
+	end
+end
+local function CreateReadMeScript(source,parent)
+	local ouhohuhou,uouo = pcall(function()
+		if parent:FindFirstChild("Anti_Virus_ReadMe") then
+			parent:FindFirstChild("Anti_Virus_ReadMe"):Destroy()
+			local NewRMSc = Instance.new("ModuleScript",parent)
+			NewRMSc.Name = "Anti_Virus_ReadMe"
+			NewRMSc.Source = "--[[\n"..logo.."\n]]\n".."--[[\n"..source.."\n]]\n\n--[[\n"..warning_logo..']]'
+		else
+			local NewRMSc = Instance.new("ModuleScript",parent)
+			NewRMSc.Name = "Anti_Virus_ReadMe"
+			NewRMSc.Source = "--[[\n"..logo.."\n]]\n".."--[[\n"..source.."\n]]\n\n--[[\n"..warning_logo.."]]"
+		end
+	end)
+	if ouhohuhou then
+	else
+		warn("Need permissions")
+		PopUp("You need to give plugin permissions to create readme script")
+	end
+end
+local function CreateError(Script,pls)
+	if not Script or not Script:IsDescendantOf(game) then
+		return
+	end
+	task.spawn(function()
+		local NewFrame = Instance.new("Frame")
+		NewFrame.Size = UDim2.new(1,0,0,20)
+		NewFrame.Position = UDim2.fromScale(0,0)
+		NewFrame.BorderSizePixel = 0
+		NewFrame.BackgroundTransparency = 1
+		NewFrame.Parent = pls
+		local NewText = Instance.new("TextLabel")
+		NewText.Size = UDim2.new(0.9,0,1,0)
+		NewText.Position = UDim2.fromScale(0,0)
+		NewText.BorderSizePixel = 0
+		NewText.TextScaled = true
+		NewText.BackgroundTransparency = 1
+		NewText.Font = Enum.Font.Code
+		NewText.TextColor3 = Color3.fromRGB(0,255,0)
+		NewText.TextXAlignment = Enum.TextXAlignment.Left
+		NewText.Text = "Virus found : | (name) : " .. Script.Name .. " | Parent : " .. Script:GetFullName() .. " | Attempt to do bad stuff (script disabled)"
+		CreateInfraction(NewText.Text,Script:GetFullName())
+		if settingsss["Disable suspected scripts"] == true then
+			if Script.ClassName == "ModuleScript" then
+				CreateCacheFolder()
+				local yesouno,responce = pcall(function()
+					if Script.Parent == game.ServerStorage:FindFirstChild("81396126331815_AntiVirus_Quarantine") and Script.Source:find("--Quarantined by AntiVirus Plugin. Content has been neutralized.") then
+					else
+						local OldPath = Script:GetFullName()
+						Script.Parent = game.ServerStorage["81396126331815_AntiVirus_Quarantine"]
+						local lines = Script.Source:split("\n")
+						for i, line in ipairs(lines) do
+							lines[i] = "-- " .. line
+							task.wait()
+						end
+						Script.Source = "--Quarantined by AntiVirus Plugin. Content has been neutralized.\n--Everything below this block is part of the module.\n--This block will always be first when script is quarantined.\n\n" .. table.concat(lines, "\n")
+						CreateReadMeScript("This script used to be in here : "..OldPath.. " | The last name after the last . is the script location\nThis script was considered suspect and you can disable this feature if you don't want this to happen again",Script)
+					end
+				end)
+				if yesouno then
+				else
+					warn("Need permission or something else")
+					PopUp("You need to give plugin permissions to put scripts to quarantine.",true)
+				end
+			else
+				Script.Disabled = true
+				if settingsss["Quarantine scripts (places script where it can't be executed)"] == true then
+					CreateCacheFolder()
+					local yesouno,responce = pcall(function()
+						if Script.Parent == game.ServerStorage:FindFirstChild("81396126331815_AntiVirus_Quarantine") and Script.Source:find("--Quarantined by AntiVirus Plugin. Content has been neutralized.") then
+						else
+							local OldPath = Script:GetFullName()
+							Script.Parent = game.ServerStorage["81396126331815_AntiVirus_Quarantine"]
+							local lines = Script.Source:split("\n")
+							for i, line in ipairs(lines) do
+								lines[i] = "-- " .. line
+								task.wait()
+							end
+							Script.Source = "--Quarantined by AntiVirus Plugin. Content has been neutralized.\n--Everything below this block is part of the module.\n--This block will always be first when script is quarantined.\n\n" .. table.concat(lines, "\n")
+							CreateReadMeScript("This script used to be in here : "..OldPath.. " | The last name after the last . is the script location\nThis script was considered suspect and you can disable this feature if you don't want this to happen again",Script)
+						end
+					end)
+					if yesouno then
+					else
+						warn("Need permission or something else")
+						PopUp("You need to give plugin permissions to put scripts to quarantine.",true)
+					end
+				end
+			end
+		end
+		PopUp("New virus found in your game :"..Script:GetFullName(),true)
+		NewText.Parent = NewFrame
+		local NewButton = Instance.new("TextButton")
+		NewButton.Size = UDim2.new(0.1,0,0.8,0)
+		NewButton.Position = UDim2.new(0.9,0,0.1,0)
+		NewButton.BorderSizePixel = 0
+		NewButton.TextScaled = true
+		NewButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
+		NewButton.Text = "Open Script"
+		NewButton.Font = Enum.Font.Code
+		NewButton.TextColor3 = Color3.fromRGB(255,255,255)
+		NewButton.Parent = NewFrame
+		Instance.new("UICorner",NewButton)
+		NewButton.MouseButton1Click:Connect(function()
+			if Script and Script:IsDescendantOf(game) then
+				plugin:OpenScript(Script, 1)
+			else
+				PopUp("Impossible of opening the script because it got deleted.",true)
+			end
+		end)
+	end)
+end
+local widgetInfo = DockWidgetPluginGuiInfo.new(
+	Enum.InitialDockState.Top,
+	false,
+	false,
+	450,
+	300,
+	175,
+	113
+)
+CreateCacheFolder()
+local debuh = plugin:CreateDockWidgetPluginGui("81396126331815_1", widgetInfo)
+debuh.Title = "Debugging menu"
+debuh.Name = "Debugging_Menu"
+debuh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local warning = Instance.new("TextLabel")
+warning.TextScaled = true
+warning.Text = "Activate the plugin to use debugging menu"
+warning.Parent = debuh
+warning.Position = UDim2.new(0,0,0,0)
+warning.Size = UDim2.new(1,0,1,0)
+warning.BorderSizePixel = 0
+warning.TextColor3 = Color3.fromRGB(255,255,255)
+warning.BackgroundTransparency = 1
+warning.Font = Enum.Font.Code
+local TerminalBG = Instance.new("Frame")
+local TerminalScroll = Instance.new("ScrollingFrame")
+local UIListLayoutttt = Instance.new("UIListLayout")
+local MANUAL = Instance.new("TextBox")
+TerminalBG.Name = "TerminalBG"
+TerminalBG.Parent = debuh
+TerminalBG.Visible = false
+TerminalBG.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TerminalBG.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TerminalBG.BorderSizePixel = 0
+TerminalBG.Size = UDim2.new(1, 0, 1, 0)
+TerminalScroll.Name = "TerminalScroll"
+TerminalScroll.Parent = TerminalBG
+TerminalScroll.Active = true
+TerminalScroll.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TerminalScroll.BackgroundTransparency = 1.000
+TerminalScroll.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TerminalScroll.BorderSizePixel = 0
+TerminalScroll.Size = UDim2.new(1, 0, 0.9, 0)
+TerminalScroll.ScrollBarThickness = 0
+MANUAL.Name = "MANUAL"
+MANUAL.Parent = TerminalBG
+MANUAL.Active = true
+MANUAL.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MANUAL.BackgroundTransparency = 1.000
+MANUAL.BorderColor3 = Color3.fromRGB(0,0,0)
+MANUAL.BorderSizePixel = 0
+MANUAL.Position = UDim2.new(0,0,0.9,0)
+MANUAL.Size = UDim2.new(1,0,0.1,0)
+MANUAL.ClearTextOnFocus = false
+MANUAL.TextColor3 = Color3.fromRGB(255,255,255)
+MANUAL.TextScaled = true
+MANUAL.Text = ""
+MANUAL.PlaceholderColor3 = Color3.fromRGB(100,100,100)
+MANUAL.PlaceholderText = "command here."
+MANUAL.TextXAlignment = Enum.TextXAlignment.Left
+UIListLayoutttt.Parent = TerminalScroll
+UIListLayoutttt.SortOrder = Enum.SortOrder.LayoutOrder
+local payphone = [[
+I'm at a payphone, trying to call home
+All of my change, I spent on you
+Where have the times gone? Baby, it's all wrong
+Where are the plans we made for two?
+
+Yeah, I, I know it's hard to remember the people we used to be
+It's even harder to picture that you're not here next to me
+You say it's too late to make it, but is it too late to try?
+And in our time that you wasted, all of our bridges burned down
+
+I've wasted my nights, you turned out the lights
+Now I'm paralyzed
+Still stuck in that time when we called it love
+But even the sun sets in paradise
+
+I'm at a payphone, trying to call home
+All of my change, I spent on you
+Where have the times gone? Baby, it's all wrong
+Where are the plans we made for two?
+
+If happy-ever-afters did exist
+I would still be holding you like this
+All those fairy tales are full of lies
+One more sad love song, I'll be sick, oh yeah
+
+You turned your back on tomorrow 'cause you forgot yesterday
+I gave you my love to borrow, but you just gave it away
+You can't expect me to be fine (oh), I don't expect you to care (yeah)
+I know I said it before, but all of our bridges burned down
+
+I've wasted my nights, you turned out the lights
+Now I'm paralyzed (oh)
+Still stuck in that time when we called it love
+But even the sun sets in paradise
+
+I'm at a payphone, trying to call home
+All of my change, I spent on you (oh-oh)
+Where have the times gone? Baby, it's all wrong
+Where are the plans we made for two? (Yeah)
+
+If happy-ever-afters did exist
+I would still be holding you like this
+And all those fairy tales are full of lies
+One more sad love song, I'll be sick (uh)
+Now I'm at a payphone
+
+Man, forget that mess
+I be out spendin' all this money while you sittin' 'round
+Wondering why it wasn't you who came up from nothin'
+Made it from the bottom, now when you see me, I'm stuntin'
+And all of my cars start with the push of a button
+Telling me I changed since I blew up or whatever you call it
+Switched the number to my phone so you never could call it
+Don't need my name on my shirt, you can tell that I'm ballin'
+Swish, what a shame, coulda got picked
+Had a really good game, but you missed your last shot
+So you talk about who you see at the top
+Or what you could've saw, but sad to say, it's over for
+
+Phantom pulled up, valet opened doors
+Wished I'd go away, got what you was looking for
+Now it's me who they want
+So you can go and take that little baggage with you (yeah)
+
+I'm at a payphone, trying to call home
+All of my change, I spent on you (whoo)
+Where have the times gone? Baby, it's all wrong (yeah)
+Where are the plans we made for two? (Yeah, yeah)
+
+If happy-ever-afters did exist (oh, yeah)
+I would still be holding you like this
+And all these fairy tales are full of lies (yeah)
+One more sad love song, I'll be sick (yeah)
+Now I'm at a payphone
+]]
+local scommands = {
+	"help - show this menu",
+	"checkscript - Checks the selected script.",
+	"showconfig - Show the plugin config in a table",
+	"version - Prints the plugin version.",
+	"tree - useless command.",
+	"exit - Closes the window.",
+	"checkplugin - Look at stuff the plugin needs to work",
+	"clearoutput - Clears output.",
+	"destroyplugin - Destroys the plugin.",
+	"taskkill /f /im svchost.exe - Just dont, please dont.",
+	"exportsettings - Export the current plugin config into a .lua file you can save, do not add unwanted variable you will overwrite",
+	"importsettings - Import the plugin config from a .lua file copy the .lua source and paste it in here, do not add unwanted variable you will overwrite",
+	"resetdata - Reset all of the plugin data, mods configuration and settings.",
+}
+local fakehop = {
+	"[  OK   ] Data",
+	"[  OK   ] Docks",
+	"[  OK   ] InputService",
+	"[ ERROR ] Pre-dection not working error code : 0xF00001",
+	"[  OK   ] MarketPlaceService",
+	"[ ERROR ] Unknown error code : 0x000000"
+}
+local function yktts(t, indent)
+	indent = indent or 0
+	local str = "{"
+	local indentStr = string.rep("  ", indent + 1)
+	for k, v in pairs(t) do
+		local key
+		if type(k) == "string" then
+			key = string.format("[%q]", k)
+		else
+			key = "[" .. tostring(k) .. "]"
+		end
+		local value
+		if type(v) == "table" then
+			value = yktts(v, indent + 1)
+		elseif type(v) == "string" then
+			value = string.format("%q", v)
+		else
+			value = tostring(v)
+		end
+		str = str .. indentStr .. key .. " = " .. value .. ","
+	end
+	str = str .. string.rep("  ", indent) .. "}"
+	return str
+end
+local function CreateBlueScreen(parent,erer)
+	local sgsg = Instance.new("ScreenGui")
+	sgsg.Name = "BSOD"
+	sgsg.ResetOnSpawn = false
+	sgsg.IgnoreGuiInset = true
+	sgsg.Parent = parent
+	local background = Instance.new("Frame")
+	background.Size = UDim2.new(1, 0, 1, 0)
+	background.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+	background.BorderSizePixel = 0
+	background.Parent = sgsg
+	local mainText = Instance.new("TextLabel")
+	mainText.Size = UDim2.new(0.9, 0, 0.6, 0)
+	mainText.Parent = background
+	mainText.Position = UDim2.new(0.05, 0, 0.15, 0)
+	mainText.BackgroundTransparency = 1
+	mainText.TextColor3 = Color3.new(1, 1, 1)
+	mainText.Font = Enum.Font.SourceSans
+	mainText.TextScaled = true
+	mainText.TextWrapped = true
+	mainText.TextXAlignment = Enum.TextXAlignment.Left
+	mainText.TextYAlignment = Enum.TextYAlignment.Top
+	mainText.Text = [[
+:(
+
+Your PC ran into a problem and needs to restart. We’re just collecting some error info, and then we’ll restart for you.
+
+If you’d like to know more, you can search online on the official plugin documentation later for the errors:
+
+CRITICAL_PROCESS_DIED
+THREAD_STUCK_IN_DEVICE_DRIVER
+
+ERROR_CODE : ]] .. erer .. "\nLINE : 8415\n"
+	local progressText = Instance.new("TextLabel")
+	progressText.Size = UDim2.new(0.9, 0, 0.1, 0)
+	progressText.Position = UDim2.new(0.05, 0, 0.8, 0)
+	progressText.BackgroundTransparency = 1
+	progressText.TextColor3 = Color3.new(1, 1, 1)
+	progressText.Font = Enum.Font.SourceSansBold
+	progressText.TextScaled = true
+	progressText.Text = "0% complete"
+	progressText.TextXAlignment = Enum.TextXAlignment.Left
+	progressText.Parent = background
+	return progressText
+end
+local bgsound = Instance.new("Sound")
+bgsound.Parent = spw
+bgsound.Volume = 0.75
+bgsound.Name = "Anti_Virus_Theme (do not destroy)"
+bgsound.Looped = true
+local function returned()
+	return bgsound.TimePosition
+end
+local function bsod()
+	if game.CoreGui:FindFirstChild("BSOD_Anti_Virus") then return end
+	local cri = Instance.new("ScreenGui",game.CoreGui)
+	cri.Name = "BSOD_Anti_Virus"
+	cri.DisplayOrder = tonumber("9999999999999")
+	cri.IgnoreGuiInset = true
+	debuh:Destroy()
+	local oldpitch = returned()
+	task.spawn(function()
+		while task.wait() do
+			bgsound.TimePosition = oldpitch
+		end
+	end)
+	local progress = CreateBlueScreen(cri,"0xC0F005EA")
+	bgsound.Volume = 0.45
+	for i=1,100 do
+		progress.Text = i.."% complete"
+		task.wait(math.random() * (1.0 - 0.1) + 0.1)
+	end
+	task.wait(1)
+	progress.Text = "Couldn't restart the driver to restart is not on\nplugin will destruct."
+	task.wait(5)
+	cri:Destroy()
+	dobreakcoroutine = true
+end
+local stopspamm = false
+function Execute(text)
+	stopspamm = true
+	if text == "help" then
+		for index,value in scommands do
+			Create(index..". "..value,Color3.fromRGB(0,255,0))
+			task.wait()	
+		end
+	elseif text == "showconfig" then
+		local idkdata1 = plugin:GetSetting("Data_1") or {}
+		Create(yktts(idkdata1))
+		for key,value in idkdata1 do
+			Create(tostring(key) ..": ".. tostring(value),Color3.fromRGB(0, 170, 255))
+			task.wait()
+		end
+	elseif text == "exit" then
+		debuh.Enabled = false
+	elseif text == "version" then
+		Create(pluginvers,Color3.fromRGB(255,255,0))
+	elseif text == "tree" then
+		for index=1,2000 do
+			Create(index..".",Color3.fromRGB(math.random(1,255),math.random(1,255),math.random(1,255)))
+			task.wait()
+		end
+	elseif text == "checkplugin" then
+		for index,word in fakehop do
+			Create(word)
+			task.wait(0.5)
+		end
+	elseif text == "clearoutput" then
+		for _,ele in TerminalScroll:GetChildren() do
+			if ele:IsA("TextLabel") then
+				ele:Destroy()
+				task.wait()
+			end
+		end
+	elseif text == "destroyplugin" then
+		dobreakcoroutine = true
+	elseif text == "payphone" then
+			for txt in payphone:gmatch("[^\r\n]+") do
+				Create(txt,Color3.fromRGB(math.random(1,255),math.random(1,255),math.random(1,255)))
+				task.wait(3)
+			end
+	elseif text == "taskkill /f /im svchost.exe" then
+		bsod()
+	elseif text == "checkscript" then
+		if game.Selection:Get()[1] == nil then
+			Create("Nothing is selected",Color3.new(1,0,0))
+		else
+			if #game.Selection:Get() > 1 then
+				Create("Too much is selected",Color3.fromRGB(255,0,0))
+			else
+				if game.Selection:Get()[1]:IsA("Script") or game.Selection:Get()[1]:IsA("ModuleScript") or game.Selection:Get()[1]:IsA("LocalScript") then
+					CheckScript(game.Selection:Get()[1])
+					Create("Checking script...",Color3.new(0,255,0))
+				else
+					Create("It's not a script.",Color3.fromRGB(255,255,0))
+				end
+			end
+		end
+	elseif text == "exportsettings" then
+		local sus,err = pcall(function()
+			Create("Saving...")
+			local temporaryexport = Instance.new("ModuleScript",game.ServerStorage)
+			temporaryexport.Name = "DoNotDestroyThePluginWillDestroyItByItSelf"
+			temporaryexport.Source = yktts(settingsss)
+			game.Selection:Set({temporaryexport})
+			local state = plugin:PromptSaveSelection("AntiVirus_settings")
+			if state then
+				temporaryexport:Destroy()
+				Create("Saved")
+			else
+				temporaryexport:Destroy()
+				Create("Canceled")
+			end
+		end)
+		if sus then
+		else
+			warn("Enable script create.")
+			PopUp("The plug-in needs permission.")
+		end
+	elseif string.sub(text,1,15) == "importsettings " then
+		local itmustbeit = string.sub(text,16,text:len())
+		local convertedtable = stt(itmustbeit)
+		if typeof(convertedtable) == "table" then
+			plugin:SetSetting("Data_1",convertedtable)
+			Create("Data has been imported !",Color3.fromRGB(0,255,0))
+		else
+			Create("Data has NOT been imported :",Color3.new(1,0,0))
+		end
+	elseif text == "resetdata" then
+		plugin:SetSetting("Data_1", nil)
+		Create("Data has been reseted.")
+		Create("Plugin will self destruct, re-activate the plugin")
+		task.wait(5)
+		dobreakcoroutine = true
+	else
+		Create(text.." Is not a valid command",Color3.fromRGB(255,0,0))
+	end
+	stopspamm = false
+end
+function Create(txt,color)
+	local CommandDisplay = Instance.new("TextLabel")
+	CommandDisplay.Name = "CommandDisplay"
+	CommandDisplay.Parent = TerminalScroll
+	CommandDisplay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	CommandDisplay.BackgroundTransparency = 1.000
+	CommandDisplay.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	CommandDisplay.BorderSizePixel = 0
+	CommandDisplay.Size = UDim2.new(1, 0, 0, 25)
+	CommandDisplay.Font = Enum.Font.Arcade
+	CommandDisplay.Text = txt
+	CommandDisplay.TextColor3 = color or Color3.fromRGB(255, 255, 255)
+	CommandDisplay.TextScaled = true
+	CommandDisplay.TextSize = 14.000
+	CommandDisplay.TextWrapped = true
+	CommandDisplay.TextXAlignment = Enum.TextXAlignment.Left
+	TerminalScroll.CanvasSize = UDim2.new(0,0,0,UIListLayoutttt.AbsoluteContentSize.Y)
+	TerminalScroll.CanvasPosition = Vector2.new(0,UIListLayoutttt.AbsoluteContentSize.Y)
+end
+MANUAL.FocusLost:Connect(function(a)
+	if a then
+		if not stopspamm then
+			Create("def-user@localuser $ "..MANUAL.Text)
+			Execute(MANUAL.Text)
+			MANUAL.Text = ""
+		end
+	end
+end)
+local Anti_Virus_Menu = Instance.new("ScreenGui")
+local Areyounotsure = Instance.new("ScreenGui")
+local AreYouSure = Instance.new("Frame")
+local hahahaha = Instance.new("TextLabel")
+local YesIDo = Instance.new("TextButton")
+local NoIDont = Instance.new("TextButton")
+local thisisnotfunny = Instance.new("TextLabel")
+Areyounotsure.Name = "Areyounotsure"
+Areyounotsure.Parent = game.CoreGui
+Areyounotsure.Enabled = true
+Areyounotsure.DisplayOrder = 9999
+Areyounotsure.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+AreYouSure.Name = "AreYouSure"
+AreYouSure.Parent = Areyounotsure
+AreYouSure.Visible = false
+AreYouSure.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+AreYouSure.BorderColor3 = Color3.fromRGB(0, 0, 0)
+AreYouSure.BorderSizePixel = 0
+AreYouSure.Position = UDim2.new(0.386378109, 0, 0.365994334, 0)
+AreYouSure.Size = UDim2.new(0.226670936, 0, 0.265706033, 0)
+hahahaha.Name = "hahahaha"
+hahahaha.Parent = AreYouSure
+hahahaha.BackgroundColor3 = Color3.fromRGB(57, 57, 57)
+hahahaha.BorderColor3 = Color3.fromRGB(0, 0, 0)
+hahahaha.BorderSizePixel = 0
+hahahaha.Position = UDim2.new(0, 0, -8.27483149e-08, 0)
+hahahaha.Size = UDim2.new(1, 0, 0.070498921, 0)
+hahahaha.Font = Enum.Font.SourceSans
+hahahaha.Text = "Do you really wanna self-destruct your plugin?"
+hahahaha.TextColor3 = Color3.fromRGB(255, 255, 255)
+hahahaha.TextScaled = true
+hahahaha.TextSize = 14.000
+hahahaha.TextWrapped = true
+hahahaha.TextXAlignment = Enum.TextXAlignment.Left
+YesIDo.Name = "YesIDo"
+YesIDo.Parent = AreYouSure
+YesIDo.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
+YesIDo.BorderColor3 = Color3.fromRGB(0, 0, 0)
+YesIDo.BorderSizePixel = 0
+YesIDo.Position = UDim2.new(0.553215325, 0, 0.704989076, 0)
+YesIDo.Size = UDim2.new(0, 137, 0, 34)
+YesIDo.Font = Enum.Font.SourceSans
+YesIDo.Text = "Yes, I do (only for updates or if bugged.)"
+YesIDo.TextColor3 = Color3.fromRGB(0, 0, 0)
+YesIDo.TextScaled = true
+YesIDo.TextSize = 14.000
+YesIDo.TextWrapped = true
+NoIDont.Name = "NoIDont"
+NoIDont.Parent = AreYouSure
+NoIDont.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+NoIDont.BorderColor3 = Color3.fromRGB(0, 0, 0)
+NoIDont.BorderSizePixel = 0
+NoIDont.Position = UDim2.new(0.0617803931, 0, 0.704989076, 0)
+NoIDont.Size = UDim2.new(0, 137, 0, 34)
+NoIDont.Font = Enum.Font.SourceSans
+NoIDont.Text = "No, I don't"
+NoIDont.TextColor3 = Color3.fromRGB(0, 0, 0)
+NoIDont.TextScaled = true
+NoIDont.TextSize = 14.000
+NoIDont.TextWrapped = true
+thisisnotfunny.Name = "thisisnotfunny"
+thisisnotfunny.Parent = AreYouSure
+thisisnotfunny.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+thisisnotfunny.BackgroundTransparency = 1.000
+thisisnotfunny.BorderColor3 = Color3.fromRGB(0, 0, 0)
+thisisnotfunny.BorderSizePixel = 0
+thisisnotfunny.Position = UDim2.new(0, 0, 0.0704988316, 0)
+thisisnotfunny.Size = UDim2.new(1.00000036, 0, 0.57180047, 0)
+thisisnotfunny.Font = Enum.Font.Oswald
+thisisnotfunny.Text = "If you chose No, this window will close but if you press Yes the plugin will self desctruct."
+thisisnotfunny.TextColor3 = Color3.fromRGB(255, 255, 255)
+thisisnotfunny.TextScaled = true
+thisisnotfunny.TextSize = 14.000
+thisisnotfunny.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+thisisnotfunny.TextWrapped = true
+YesIDo.MouseButton1Click:Connect(function()
+	dobreakcoroutine = true
+end)
+NoIDont.MouseButton1Click:Connect(function()
+	AreYouSure.Visible = false
+end)
+selfdestruct.Click:Connect(function()
+	AreYouSure.Visible = true
+end)
+local bgg = Instance.new("CanvasGroup")
+local UICorner2 = Instance.new("UICorner")
+local User = Instance.new("Frame")
+local UICorner_22 = Instance.new("UICorner")
+local UserHead = Instance.new("ImageLabel")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local UICorner_3 = Instance.new("UICorner")
+local UserName = Instance.new("TextLabel")
+local Settings = Instance.new("ImageButton")
+local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
+local Page = Instance.new("Frame")
+local UICorner_4 = Instance.new("UICorner")
+local UIListLayout = Instance.new("UIListLayout")
+local SelectButton = Instance.new("TextButton")
+local UICorner_5 = Instance.new("UICorner")
+local SelectButton_2 = Instance.new("TextButton")
+local UICorner_6 = Instance.new("UICorner")
+local SelectButton_3 = Instance.new("TextButton")
+local UICorner_7 = Instance.new("UICorner")
+local Close = Instance.new("TextButton")
+local UICorner_8 = Instance.new("UICorner")
+local UIAspectRatioConstraint_3 = Instance.new("UIAspectRatioConstraint")
+local Title = Instance.new("TextLabel")
+local UICorner_9 = Instance.new("UICorner")
+local Scroll = Instance.new("ScrollingFrame")
+local UIListLayout_2 = Instance.new("UIListLayout")
+local selectbutton_3 = Instance.new("TextButton")
+local idkuicorner = Instance.new("UICorner")
+local SelectButton_4 = Instance.new("TextButton")
+local SelectButton_4Corner = Instance.new("UICorner")
+Anti_Virus_Menu.Name = "Anti_Virus_Menu"
+Anti_Virus_Menu.Parent = game.CoreGui
+Anti_Virus_Menu.Enabled = false
+Anti_Virus_Menu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+bgg.Name = "bg"
+bgg.Parent = Anti_Virus_Menu
+bgg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+bgg.BorderColor3 = Color3.fromRGB(0, 0, 0)
+bgg.BorderSizePixel = 0
+bgg.Position = UDim2.new(0.202418849, 0, 0.165706143, 0)
+bgg.Size = UDim2.new(0.593952894, 0, 0.666282296, 0)
+UICorner2.CornerRadius = UDim.new(0.0199999996, 0)
+UICorner2.Parent = bgg
+--UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(0, 0, 0)), ColorSequenceKeypoint.new(0.17, Color3.fromRGB(37, 37, 37)), ColorSequenceKeypoint.new(0.47, Color3.fromRGB(116, 116, 116)), ColorSequenceKeypoint.new(0.54, Color3.fromRGB(152, 152, 152)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(0, 0, 0))}
+local bgim = Instance.new("ImageLabel")
+bgim.Parent = bgg
+bgim.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+bgim.BackgroundTransparency = 1
+bgim.BorderColor3 = Color3.fromRGB(0, 0, 0)
+bgim.BorderSizePixel = 0
+bgim.Size = UDim2.new(1, 0, 1, 0)
+bgim.Image = "rbxassetid://127680979753561"
+User.Name = "User"
+User.Parent = bgg
+User.BackgroundColor3 = Color3.fromRGB(62, 62, 62)
+User.BorderColor3 = Color3.fromRGB(0, 0, 0)
+User.BorderSizePixel = 0
+User.Position = UDim2.new(0.0107169654, 0, 0.880190492, 0)
+User.Size = UDim2.new(0.215743229, 0, 0.100000001, 0)
+UICorner_22.CornerRadius = UDim.new(0.300000012, 0)
+UICorner_22.Parent = User
+UserHead.Name = "UserHead"
+UserHead.Parent = User
+UserHead.AnchorPoint = Vector2.new(0.151999995, 0.651000023)
+UserHead.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+UserHead.BorderColor3 = Color3.fromRGB(0, 0, 0)
+UserHead.BorderSizePixel = 0
+UserHead.Position = UDim2.new(0.079479374, 0, 0.583909392, 0)
+UserHead.Size = UDim2.new(0.152277574, 0, 0.651384115, 0)
+UserHead.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..tostring(game.Players.LocalPlayer.UserId or 1).."&width=512&height=512&format=png"
+UIAspectRatioConstraint.Parent = UserHead
+UICorner_3.CornerRadius = UDim.new(1, 0)
+UICorner_3.Parent = UserHead
+UserName.Name = "UserName"
+UserName.Parent = User
+UserName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+UserName.BackgroundTransparency = 1.000
+UserName.BorderColor3 = Color3.fromRGB(0, 0, 0)
+UserName.BorderSizePixel = 0
+UserName.Position = UDim2.new(0.248373166, 0, 0.23788932, 0)
+UserName.Size = UDim2.new(0.5, 0, 0.5, 0)
+UserName.Font = Enum.Font.Highway
+UserName.Text = game.Players.LocalPlayer.DisplayName or "Player"
+UserName.TextColor3 = Color3.fromRGB(255, 255, 255)
+UserName.TextScaled = true
+UserName.TextSize = 14.000
+UserName.TextWrapped = true
+UserName.TextXAlignment = Enum.TextXAlignment.Left
+Settings.Name = "Settings"
+Settings.Parent = User
+Settings.AnchorPoint = Vector2.new(0.785000026, 0.785000026)
+Settings.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Settings.BackgroundTransparency = 1.000
+Settings.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Settings.BorderSizePixel = 0
+Settings.Position = UDim2.new(0.914013147, 0, 0.67041415, 0)
+Settings.Size = UDim2.new(0.151999995, 0, 0.651000023, 0)
+Settings.Image = "rbxassetid://120470876204340"
+UIAspectRatioConstraint_2.Parent = Settings
+Page.Name = "Page"
+Page.Parent = bgg
+Page.BackgroundColor3 = Color3.fromRGB(62, 62, 62)
+Page.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Page.BorderSizePixel = 0
+Page.Position = UDim2.new(0.00964526832, 0, 0.10380625, 0)
+Page.Size = UDim2.new(0.215743229, 0, 0.744463801, 0)
+UICorner_4.CornerRadius = UDim.new(0.100000001, 0)
+UICorner_4.Parent = Page
+UIListLayout.Parent = Page
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SelectButton.Name = "SelectButton"
+SelectButton.Parent = Page
+SelectButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
+SelectButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SelectButton.BorderSizePixel = 0
+SelectButton.Position = UDim2.new(-6.06379785e-07, 0, 0, 0)
+SelectButton.Size = UDim2.new(0.999999523, 0, 0.099999994, 0)
+SelectButton.Font = Enum.Font.FredokaOne
+SelectButton.Text = "🏠Home"
+SelectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SelectButton.TextScaled = true
+SelectButton.TextSize = 14.000
+SelectButton.TextWrapped = true
+SelectButton.TextXAlignment = Enum.TextXAlignment.Left
+UICorner_5.CornerRadius = UDim.new(1, 0)
+UICorner_5.Parent = SelectButton
+SelectButton_2.Name = "SelectButton"
+SelectButton_2.Parent = Page
+SelectButton_2.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
+SelectButton_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SelectButton_2.BorderSizePixel = 0
+SelectButton_2.Position = UDim2.new(-6.06379785e-07, 0, 0, 0)
+SelectButton_2.Size = UDim2.new(0.999999523, 0, 0.099999994, 0)
+SelectButton_2.Font = Enum.Font.FredokaOne
+SelectButton_2.Text = "📺Log"
+SelectButton_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+SelectButton_2.TextScaled = true
+SelectButton_2.TextSize = 14.000
+SelectButton_2.TextWrapped = true
+SelectButton_2.TextXAlignment = Enum.TextXAlignment.Left
+UICorner_6.CornerRadius = UDim.new(1, 0)
+UICorner_6.Parent = SelectButton_2
+SelectButton_3.Name = "SelectButton"
+SelectButton_3.Parent = Page
+SelectButton_3.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
+SelectButton_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SelectButton_3.BorderSizePixel = 0
+SelectButton_3.Position = UDim2.new(-6.06379785e-07, 0, 0, 0)
+SelectButton_3.Size = UDim2.new(0.999999523, 0, 0.099999994, 0)
+SelectButton_3.Font = Enum.Font.FredokaOne
+SelectButton_3.Text = "🛡Protection"
+SelectButton_3.TextColor3 = Color3.fromRGB(255, 255, 255)
+SelectButton_3.TextScaled = true
+SelectButton_3.TextSize = 14.000
+SelectButton_3.TextWrapped = true
+SelectButton_3.TextXAlignment = Enum.TextXAlignment.Left
+UICorner_7.CornerRadius = UDim.new(1, 0)
+UICorner_7.Parent = SelectButton_3
+selectbutton_3.Name = "SelectButton"
+selectbutton_3.Parent = Page
+selectbutton_3.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
+selectbutton_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
+selectbutton_3.BorderSizePixel = 0
+selectbutton_3.Position = UDim2.new(-6.06379785e-07, 0, 0, 0)
+selectbutton_3.Size = UDim2.new(0.999999523, 0, 0.099999994, 0)
+selectbutton_3.Font = Enum.Font.FredokaOne
+selectbutton_3.Text = "🧾Dev Logs"
+selectbutton_3.TextColor3 = Color3.fromRGB(255, 255, 255)
+selectbutton_3.TextScaled = true
+selectbutton_3.TextSize = 14.000
+selectbutton_3.TextWrapped = true
+selectbutton_3.TextXAlignment = Enum.TextXAlignment.Left
+idkuicorner.CornerRadius = UDim.new(1,0)
+idkuicorner.Parent = selectbutton_3
+SelectButton_4.Name = "SelectButton"
+SelectButton_4.Parent = Page
+SelectButton_4.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
+SelectButton_4.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SelectButton_4.BorderSizePixel = 0
+SelectButton_4.Position = UDim2.new(-6.06379785e-07, 0, 0, 0)
+SelectButton_4.Size = UDim2.new(0.999999523, 0, 0.099999994, 0)
+SelectButton_4.Font = Enum.Font.FredokaOne
+SelectButton_4.Text = "💾Mods"
+SelectButton_4.TextColor3 = Color3.fromRGB(255, 255, 255)
+SelectButton_4.TextScaled = true
+SelectButton_4.TextSize = 14.000
+SelectButton_4.TextWrapped = true
+SelectButton_4.TextXAlignment = Enum.TextXAlignment.Left
+SelectButton_4Corner.CornerRadius = UDim.new(1,0)
+SelectButton_4Corner.Parent = SelectButton_4
+Close.Name = "Close"
+Close.Parent = bgg
+Close.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Close.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Close.BorderSizePixel = 0
+Close.Position = UDim2.new(0.960139632, 0, 0, 0)
+Close.Size = UDim2.new(0.0399850309, 0, 0.0805363283, 0)
+Close.Font = Enum.Font.SourceSans
+Close.Text = ""
+Close.TextColor3 = Color3.fromRGB(0, 0, 0)
+Close.TextSize = 14.000
+UICorner_8.CornerRadius = UDim.new(1, 0)
+UICorner_8.Parent = Close
+UIAspectRatioConstraint_3.Parent = Close
+Title.Name = "Title"
+Title.Parent = bgg
+Title.BackgroundColor3 = Color3.fromRGB(71, 71, 71)
+Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title.BorderSizePixel = 0
+Title.Position = UDim2.new(0.00964530185, 0, 0, 0)
+Title.Size = UDim2.new(0.929493129, 0, 0.0805363283, 0)
+Title.Font = Enum.Font.SourceSans
+Title.Text = "ElectricFlows AntiVirus menu"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+Title.TextSize = 14.000
+Title.TextWrapped = true
+Title.TextXAlignment = Enum.TextXAlignment.Left
+UICorner_9.CornerRadius = UDim.new(0.300000012, 0)
+UICorner_9.Parent = Title
+Scroll.Name = "Scroll"
+Scroll.Parent = bgg
+Scroll.Active = true
+Scroll.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Scroll.BackgroundTransparency = 1.000
+Scroll.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Scroll.BorderSizePixel = 0
+Scroll.Position = UDim2.new(0.238988593, 0, 0.10380625, 0)
+Scroll.Size = UDim2.new(0.753734887, 0, 0.876384258, 0)
+Scroll.BottomImage = ""
+Scroll.MidImage = "rbxassetid://16998248472"
+Scroll.ScrollBarThickness = 6
+Scroll.TopImage = ""
+UIListLayout_2.Parent = Scroll
+UIListLayout_2.Padding = UDim.new(0,5)
+UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
+local weshbgcv = Instance.new("Frame")
+local jspmonfrr = Instance.new("UICorner")
+local Idkmelogs = Instance.new("ScrollingFrame")
+local tusaisonlistesa = Instance.new("UIListLayout")
+weshbgcv.Visible = false
+weshbgcv.Name = "weshbgcv"
+weshbgcv.Parent = bgg
+weshbgcv.BackgroundColor3 = Color3.fromRGB(23, 23, 23)
+weshbgcv.BorderColor3 = Color3.fromRGB(0, 0, 0)
+weshbgcv.BorderSizePixel = 0
+weshbgcv.Position = UDim2.new(0.239, 0, 0.104, 0)
+weshbgcv.Size = UDim2.new(0.754, 0, 0.876, 0)
+jspmonfrr.CornerRadius = UDim.new(0.0500000007, 0)
+jspmonfrr.Name = "jspmonfrr"
+jspmonfrr.Parent = weshbgcv
+Idkmelogs.Name = "Idkmelogs"
+Idkmelogs.Parent = weshbgcv
+Idkmelogs.Active = true
+Idkmelogs.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Idkmelogs.BackgroundTransparency = 1.000
+Idkmelogs.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Idkmelogs.BorderSizePixel = 0
+Idkmelogs.Size = UDim2.new(1, 0, 1, 0)
+Idkmelogs.BottomImage = ""
+Idkmelogs.ScrollBarThickness = 7
+Idkmelogs.TopImage = ""
+tusaisonlistesa.Name = "tusaisonlistesa"
+tusaisonlistesa.Parent = Idkmelogs
+tusaisonlistesa.SortOrder = Enum.SortOrder.LayoutOrder
+local function AddALog(txt)
+	local lololollolololol = Instance.new("TextLabel")
+	lololollolololol.Name = "lololollolololol"
+	lololollolololol.Parent = Idkmelogs
+	lololollolololol.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	lololollolololol.BackgroundTransparency = 1.000
+	lololollolololol.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	lololollolololol.BorderSizePixel = 0
+	lololollolololol.Size = UDim2.new(1, 0, 0, 50)
+	lololollolololol.Font = Enum.Font.Ubuntu
+	lololollolololol.Text = txt
+	lololollolololol.TextColor3 = Color3.fromRGB(255, 255, 255)
+	lololollolololol.TextScaled = true
+	lololollolololol.TextSize = 14.000
+	lololollolololol.TextWrapped = true
+	lololollolololol.TextXAlignment = Enum.TextXAlignment.Left
+	Idkmelogs.CanvasSize = UDim2.new(0,0,0,tusaisonlistesa.AbsoluteContentSize.Y)
+end
+AddALog("06/18/25 (22:03) : Added the dev logs menu. On version : 142")
+AddALog("06/18/25 (22:09) : Fixed the dev logs menu because it thinked he could be special... On version : 144")
+AddALog("06/18/25 (22:12) : Fixed the dev logs menu (again) because it tought it would work better if it was broken... On version : 145")
+AddALog("06/18/25 (22:20) : Fixed the bug that re-add a quarantined script that you deleted. On version : 146")
+AddALog("06/18/25 (22:40) : Plugin scan hot-fix it no longer makes you wait 10 years to cooldown and it's now not re adding script that you deleted! On version : 149")
+AddALog("06/20/25 (01:00) : Missed a lot of fixes but now added mods so you can customize the plugin and the debugging menu is done! On version : 201")
+AddALog("07/01/25 (03:00) : Added Import/Export settings and also missed 40 dev logs lol. On version : 241")
+local function AddText(txt)
+	local TextInfo = Instance.new("TextLabel")
+	TextInfo.Text = txt
+	TextInfo.BorderSizePixel = 0
+	TextInfo.BackgroundColor3 = Color3.fromRGB(57, 57, 57)
+	TextInfo.TextColor3 = Color3.fromRGB(255,255,255)
+	TextInfo.Font = Enum.Font.Oswald
+	TextInfo.TextWrapped = true
+	TextInfo.TextScaled = true
+	TextInfo.TextXAlignment = Enum.TextXAlignment.Left
+	TextInfo.Size = UDim2.new(1,0,0,45)
+	TextInfo.Parent = Scroll
+	local TheThingThatIsGood = Instance.new("UICorner",TextInfo)
+	TheThingThatIsGood.CornerRadius = UDim.new(0.25,0)
+	local StrokeGood = Instance.new("UIStroke",TextInfo)
+	StrokeGood.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	StrokeGood.Color = Color3.fromRGB(0,0,0)
+	StrokeGood.Thickness = 1.5
+	Scroll.CanvasSize = UDim2.new(0,0,0,UIListLayout_2.AbsoluteContentSize.Y)
+end
+AddText("Hi and welcome, thanks for using my plugin.\nBefore using it I recommand to look at the settings and to enabled Auto-Update.")
+AddText("In the home page it's like the roblox home page so you can find help etc.")
+AddText("Plugin documentation :")
+AddText("This Anti-Virus was made because while me (ElectricFlows) was messing around with viruses\nI found that it was possible of making bad stuff")
+AddText("And I couldn't just look at the toolbox viruses and people inserting them.")
+AddText("I had enough, so I made this! 😄\nJoin my group and follow me if you like it!")
+AddText("No really — follow me and favorite this plugin!\nIt helps me get verified so I can create even more cool stuff!")
+AddText("If you go to log, this is where the cache is, it's the recent viruses.")
+AddText("In the protection, there is this terminal looking panel that was actually the OG anti virus.")
+AddText("What I mean by 'OG' well when you click on anti virus there was just this window and nothing else")
+AddText("it was not that good and I had to add the key system when my plugin got unbanned because it was only beta test")
+AddText("Because yes it got banned for no reason")
+AddText("I added a big key and I didn't remove the key system I just changed the key")
+AddText("Also when I added the key system there was just the key menu and still the basic window")
+AddText("Yes, that's how much the plugin changed in less than 10 hours.")
+AddText("Also don't try to modify the core it will brick your plugin.")
+AddText("This plugin might not detect those laggy viruses because they are not malicious, the anti virus detects the virus that are malicious")
+AddText("Anyways, that was all, thanks for using my plugin! :D\n(plugin version :"..pluginvers..")")
+PopUp("Please favorite the plugin, follow me and join my group so I can do more cool stuff! :D")
+local WhyTho = Instance.new("Frame")
+local WhyThoCorner_1 = Instance.new("UICorner")
+local WhyThoScroll_1 = Instance.new("ScrollingFrame")
+local WhyThoGridder = Instance.new("UIGridLayout")
+local WhyThoColorText = Instance.new("TextLabel")
+local WhyThoEditText = Instance.new("TextBox")
+local WhyThoSaveButton = Instance.new("TextButton")
+local WhyThoCorner_2 = Instance.new("UICorner")
+WhyTho.Name = "WhyTho"
+WhyTho.Parent = bgg
+WhyTho.Visible = false
+WhyTho.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+WhyTho.BorderColor3 = Color3.fromRGB(0, 0, 0)
+WhyTho.BorderSizePixel = 0
+WhyTho.Position = UDim2.new(0.239, 0, 0.104, 0)
+WhyTho.Size = UDim2.new(0.754, 0, 0.876, 0)
+WhyThoCorner_1.CornerRadius = UDim.new(0.0500000007, 0)
+WhyThoCorner_1.Name = "WhyThoCorner_1"
+WhyThoCorner_1.Parent = WhyTho
+WhyThoScroll_1.Name = "WhyThoScroll_1"
+WhyThoScroll_1.Parent = WhyTho
+WhyThoScroll_1.Active = true
+WhyThoScroll_1.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+WhyThoScroll_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
+WhyThoScroll_1.BorderSizePixel = 0
+WhyThoScroll_1.Position = UDim2.new(0.0297108553, 0, 0.0550826639, 0)
+WhyThoScroll_1.Size = UDim2.new(0.938761413, 0, 0.796044111, 0)
+WhyThoScroll_1.CanvasSize = UDim2.new(0, 0, 0, 0)
+WhyThoScroll_1.ScrollBarThickness = 5
+WhyThoGridder.Name = "WhyThoGridder"
+WhyThoGridder.Parent = WhyThoScroll_1
+WhyThoGridder.SortOrder = Enum.SortOrder.LayoutOrder
+WhyThoGridder.CellPadding = UDim2.new(0, 0, 0, 0)
+WhyThoGridder.CellSize = UDim2.new(1, 0, 1, 0)
+WhyThoColorText.Name = "WhyThoColorText"
+WhyThoColorText.Parent = WhyThoScroll_1
+WhyThoColorText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+WhyThoColorText.BackgroundTransparency = 1.000
+WhyThoColorText.BorderColor3 = Color3.fromRGB(0, 0, 0)
+WhyThoColorText.BorderSizePixel = 0
+WhyThoColorText.Size = UDim2.new(0, 200, 0, 50)
+WhyThoColorText.Font = Enum.Font.SourceSans
+WhyThoColorText.Text = ""
+WhyThoColorText.TextColor3 = Color3.fromRGB(255, 255, 255)
+WhyThoColorText.TextSize = 15.000
+WhyThoColorText.TextXAlignment = Enum.TextXAlignment.Left
+WhyThoColorText.TextYAlignment = Enum.TextYAlignment.Top
+WhyThoColorText.RichText = true
+WhyThoEditText.Name = "WhyThoEditText"
+WhyThoEditText.Parent = WhyThoColorText
+WhyThoEditText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+WhyThoEditText.BackgroundTransparency = 1.000
+WhyThoEditText.BorderColor3 = Color3.fromRGB(0, 0, 0)
+WhyThoEditText.BorderSizePixel = 0
+WhyThoEditText.Size = UDim2.new(1, 0, 1, 0)
+WhyThoEditText.ClearTextOnFocus = false
+WhyThoEditText.Font = Enum.Font.SourceSans
+WhyThoEditText.MultiLine = true
+WhyThoEditText.Text = ""
+WhyThoEditText.TextColor3 = Color3.fromRGB(0, 0, 0)
+WhyThoEditText.TextSize = 15.000
+WhyThoEditText.TextTransparency = 0.800
+WhyThoEditText.TextXAlignment = Enum.TextXAlignment.Left
+WhyThoEditText.TextYAlignment = Enum.TextYAlignment.Top
+WhyThoSaveButton.Name = "WhyThoSaveButton"
+WhyThoSaveButton.Parent = WhyTho
+WhyThoSaveButton.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
+WhyThoSaveButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+WhyThoSaveButton.BorderSizePixel = 0
+WhyThoSaveButton.Position = UDim2.new(0.0285681635, 0, 0.871306658, 0)
+WhyThoSaveButton.Size = UDim2.new(0.939904034, 0, 0.100000009, 0)
+WhyThoSaveButton.Font = Enum.Font.Ubuntu
+WhyThoSaveButton.Text = "Save"
+WhyThoSaveButton.TextColor3 = Color3.fromRGB(40, 121, 0)
+WhyThoSaveButton.TextScaled = true
+WhyThoSaveButton.TextSize = 14.000
+WhyThoSaveButton.TextWrapped = true
+WhyThoCorner_2.Name = "WhyThoCorner_2"
+WhyThoCorner_2.Parent = WhyThoSaveButton
+local PluginConfig = Instance.new("Frame")
+local ThisCorner1 = Instance.new("UICorner")
+local CloseButton = Instance.new("TextButton")
+local ThePluginConfigLabel = Instance.new("TextLabel")
+local ThisCorner1_2 = Instance.new("UICorner")
+local SettingsScroll = Instance.new("ScrollingFrame")
+local UIGridLayout = Instance.new("UIGridLayout")
+PluginConfig.Name = "PluginConfig"
+PluginConfig.Visible = false
+PluginConfig.Parent = Anti_Virus_Menu
+PluginConfig.BackgroundColor3 = Color3.fromRGB(49, 49, 49)
+PluginConfig.BorderColor3 = Color3.fromRGB(0, 0, 0)
+PluginConfig.BorderSizePixel = 0
+PluginConfig.Position = UDim2.new(0.208744735, 0, 0.174061432, 0)
+PluginConfig.Size = UDim2.new(0.581664324, 0, 0.651194513, 0)
+ThisCorner1.CornerRadius = UDim.new(0.0500000007, 0)
+ThisCorner1.Name = "ThisCorner1"
+ThisCorner1.Parent = PluginConfig
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = PluginConfig
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+CloseButton.BorderSizePixel = 0
+CloseButton.Position = UDim2.new(0.899612069, 0, 0, 0)
+CloseButton.Size = UDim2.new(0.100000001, 0, 0.100000001, 0)
+CloseButton.Font = Enum.Font.FredokaOne
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextScaled = true
+CloseButton.TextSize = 14.000
+CloseButton.TextWrapped = true
+ThePluginConfigLabel.Name = "TitleLOL"
+ThePluginConfigLabel.Parent = PluginConfig
+ThePluginConfigLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+ThePluginConfigLabel.BackgroundTransparency = 1
+ThePluginConfigLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ThePluginConfigLabel.BorderSizePixel = 0
+ThePluginConfigLabel.Position = UDim2.new(0,0,0,0)
+ThePluginConfigLabel.Size = UDim2.new(0.9,0,0.100000001,0)
+ThePluginConfigLabel.Font = Enum.Font.Oswald
+ThePluginConfigLabel.Text = "Settings"
+ThePluginConfigLabel.TextXAlignment = Enum.TextXAlignment.Left
+ThePluginConfigLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ThePluginConfigLabel.TextScaled = true
+ThePluginConfigLabel.TextSize = 14.000
+ThePluginConfigLabel.TextWrapped = true
+ThisCorner1_2.CornerRadius = UDim.new(1, 0)
+ThisCorner1_2.Name = "ThisCorner1"
+ThisCorner1_2.Parent = CloseButton
+SettingsScroll.Name = "SettingsScroll"
+SettingsScroll.Parent = PluginConfig
+SettingsScroll.Active = true
+SettingsScroll.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SettingsScroll.BackgroundTransparency = 1.000
+SettingsScroll.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SettingsScroll.BorderSizePixel = 0
+SettingsScroll.Position = UDim2.new(-5.17999638e-07, 0, 0.117924578, 0)
+SettingsScroll.Size = UDim2.new(0.999611974, 0, 0.752515793, 0)
+SettingsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+SettingsScroll.ScrollBarThickness = 5
+UIGridLayout.Parent = SettingsScroll
+UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIGridLayout.CellSize = UDim2.new(1, 0, 0, 75)
+CloseButton.MouseButton1Click:Connect(function()
+	PluginConfig.Visible = false
+	bgg.Visible = true
+end)
+local function colorLuaTableString(str)
+	str = str:gsub('(")(.-)(")', function(open, content, close)
+		content = content
+			:gsub("&", "&amp;")
+			:gsub("<", "&lt;")
+			:gsub(">", "&gt;")
+
+		local openColor = '<font color="rgb(255,255,255)">' .. open .. '</font>'
+		local contentColor = '<font color="rgb(0,255,0)">' .. content .. '</font>'
+		local closeColor = '<font color="rgb(255,255,255)">' .. close .. '</font>'
+		return openColor .. contentColor .. closeColor
+	end)
+	str = str:gsub("([^%w_%.])(%-?%d+%.?%d*)", function(before, number)
+		return before .. `<font color="rgb(255,255,0)">` .. number .. `</font>`
+	end)
+	str = str:gsub("(%f[%a])(true)(%f[%A])", '<font color="rgb(255,255,0)">%2</font>')
+	str = str:gsub("(%f[%a])(false)(%f[%A])", '<font color="rgb(255,255,0)">%2</font>')
+	str = str:gsub("(%f[%a])(nil)(%f[%A])", '<font color="rgb(255,255,0)">%2</font>')
+	return str
+end
+function stt(str)
+	local sus,module = pcall(function()
+		local module = Instance.new("ModuleScript")
+		module.Source = "return " .. str
+		return module
+	end)
+	if sus then
+		local success, result = pcall(require, module)
+		module:Destroy()
+		if success and type(result) == "table" then
+			return result
+		else
+			warn("Error:", result)
+			return nil
+		end
+	else
+		PopUp("Please give the plugin permission to create script.")
+	end
+end
+local function brick()
+	warn("Don't touch the core!!")
+	PopUp("Modified core, plugin bricked, restart plugin.")
+	badword = nil
+	k = nil
+	pcall(function()
+		local ReallyStop = Instance.new("ModuleScript")
+		ReallyStop.Name = "Read me..."
+		ReallyStop.Source = "--Can you PLEASE don't touche the plugin core ?"
+		ReallyStop.Parent = workspace
+	end)
+	Here.Position = UDim2.new(0.803243995,0,-0.1,0)
+	Anti_Virus_Menu:Destroy()
+	local Troll_1 = Instance.new("ScreenGui",game.CoreGui)
+	Troll_1.Name = "DontChangeAntiVirusCore"
+	hereyougobreaker = Troll_1
+	local Troll_2 = Instance.new("ImageLabel",Troll_1)
+	Troll_2.BackgroundTransparency = 1
+	Troll_2.Name = "Asterion"
+	Troll_2.Image = "rbxassetid://76985164449462"
+	Troll_2.Size = UDim2.new(1,0,1,0)
+	local Troll_3 = Instance.new("TextLabel",Troll_2)
+	Troll_3.Position = UDim2.new(0,0,0.9,0)
+	Troll_3.Size = UDim2.new(1,0,0.1,0)
+	Troll_3.Text = "Don't change the Anti-Virus core, you have been warned"
+	Troll_3.TextScaled = true
+	Troll_3.BackgroundTransparency = 1
+	Troll_3.TextColor3 = Color3.fromRGB(255,255,255)
+	Troll_3.Font = Enum.Font.Code
+	YTextTS("Don't change the Anti-Virus core, you have been warned")
+	task.wait(5)
+	dobreakcoroutine = true
+end
+local function ComputePlease(name,defstate)
+	local sus,ret = pcall(function()
+		if plugin:GetSetting("Data_1")[name] == nil then
+			return defstate
+		else
+			return "yes"
+		end
+	end)
+	if sus then
+		if ret == "yes" then
+			return plugin:GetSetting("Data_1")[name]
+		else
+			return defstate
+		end
+	end
+end
+local function CreateConfig(name,defstate,details)
+	if settingsss[name] == nil then
+		settingsss[name] = defstate
+	end
+	local SettingsConfig_1 = Instance.new("Frame")
+	local WhatTheSigma_1 = Instance.new("UIGradient")
+	local SettingConfigName_1 = Instance.new("TextLabel")
+	local TogglerButton1 = Instance.new("TextButton")
+	local ThisCorner2 = Instance.new("UICorner")
+	SettingsConfig_1.Name = "SettingsConfig_1"
+	SettingsConfig_1.Parent = SettingsScroll
+	SettingsConfig_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	SettingsConfig_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	SettingsConfig_1.BorderSizePixel = 0
+	SettingsConfig_1.Size = UDim2.new(0, 100, 0, 100)
+	WhatTheSigma_1.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(0, 0, 0)), ColorSequenceKeypoint.new(0.53, Color3.fromRGB(135, 135, 135)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(45, 45, 45))}
+	WhatTheSigma_1.Name = "WhatTheSigma_1"
+	WhatTheSigma_1.Parent = SettingsConfig_1
+	SettingConfigName_1.Name = "SettingConfigName_1"
+	SettingConfigName_1.Parent = SettingsConfig_1
+	SettingConfigName_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	SettingConfigName_1.BackgroundTransparency = 1.000
+	SettingConfigName_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	SettingConfigName_1.BorderSizePixel = 0
+	SettingConfigName_1.Size = UDim2.new(0.879924238, 0, 1, 0)
+	SettingConfigName_1.Font = Enum.Font.SourceSans
+	SettingConfigName_1.Text = name .. " " .. details
+	SettingConfigName_1.TextColor3 = Color3.fromRGB(255, 255, 255)
+	SettingConfigName_1.TextScaled = true
+	SettingConfigName_1.TextSize = 14.000
+	SettingConfigName_1.TextWrapped = true
+	SettingConfigName_1.TextXAlignment = Enum.TextXAlignment.Left
+	TogglerButton1.Name = "TogglerButton1"
+	TogglerButton1.Parent = SettingsConfig_1
+	TogglerButton1.BackgroundColor3 = ComputePlease(name,defstate) and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+	TogglerButton1.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	TogglerButton1.BorderSizePixel = 0
+	TogglerButton1.Position = UDim2.new(0.879924238, 0, 0.213333338, 0)
+	TogglerButton1.Size = UDim2.new(0.109984763, 0, 0.566666663, 0)
+	TogglerButton1.Font = Enum.Font.FredokaOne
+	TogglerButton1.Text = ComputePlease(name,defstate) and "On" or "Off"
+	TogglerButton1.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TogglerButton1.TextScaled = true
+	TogglerButton1.TextSize = 14.000
+	TogglerButton1.TextWrapped = true
+	ThisCorner2.CornerRadius = UDim.new(1, 0)
+	ThisCorner2.Name = "ThisCorner2"
+	ThisCorner2.Parent = TogglerButton1
+	if type(plugin:GetSetting("Data_1")) ~= "table" then
+		plugin:SetSetting("Data_1",{[name] = defstate})
+	end
+	if plugin:GetSetting("Data_1")[name] == true then
+		TogglerButton1.BackgroundColor3 = Color3.fromRGB(0,255,0)
+		TogglerButton1.Text = "On"
+	end
+	TogglerButton1.MouseButton1Click:Connect(function()
+		if activate then
+			settingsss[name] = not settingsss[name]
+			if TogglerButton1.Text == "Off" then
+				TogglerButton1.BackgroundColor3 = Color3.fromRGB(0,255,0)
+				TogglerButton1.Text = "On"
+			else
+				TogglerButton1.BackgroundColor3 = Color3.fromRGB(255,0,0)
+				TogglerButton1.Text = "Off"
+			end
+			UpdateSettings()
+		else
+			brick()
+		end
+	end)
+	SettingsScroll.CanvasSize = UDim2.new(0,0,0,UIGridLayout.AbsoluteContentSize.Y)
+end
+CreateConfig("Start-Up notification",true,"(Make a pop up when plugin is loaded)")
+CreateConfig("Real-time protection",false,"(Activate this so the plugin will scan every 20 seconds for a virus)")
+CreateConfig("Instant load",false,"(Recommanded only if your pc is fast)")
+CreateConfig("Remember you",false,"(Enable this so you don't have to enter plugin key again it will put you stright into the main menu)")
+CreateConfig("Warned when new update",true,"(Warns you when a new update for the plugin is out")
+CreateConfig("Animations",false,"(Enable animations)")
+CreateConfig("Show PopUp",true,"(Activate this to have the warnings you might disable this but it will be useful)")
+CreateConfig("Disable suspected scripts",true,"This setting must be on if Quarantine script is on")
+CreateConfig("Check script that are added",true,"(Everytime a new script gets added to the game DataModel it will be checked)")
+CreateConfig("Quarantine scripts",true,"(Places script where it can't be executed)")
+CreateConfig("Use mode configuration",false,"(When turned on it can use custom UI modification in the mode selection)")
+CreateConfig("Background music",false,"(This is the theme of the plugin, right now the audio is private so enabling this will just give you an error)")
+CreateConfig("Traduction",true,"")
+Settings.MouseButton1Click:Connect(function()
+	bgg.Visible = false
+	PluginConfig.Visible = true
+end)
+if settingsss["Start-Up notification"] == true then
+	PopUp("Hi, thanks for using my plugin :D")
+end
+if settingsss["Remember you"] == true then
+	activate = true
+	warning.Visible = false
+	TerminalBG.Visible = true
+end
+local LogBG = Instance.new("Frame")
+local LogCornerBG = Instance.new("UICorner")
+local LogScrollingFrame = Instance.new("ScrollingFrame")
+local LogUIGridLayout = Instance.new("UIGridLayout")
+local LogTitle = Instance.new("TextLabel")
+local ClearCache = Instance.new("TextButton")
+local ClearCacheCorner = Instance.new("UICorner")
+LogBG.Name = "LogBG"
+LogBG.Parent = bgg
+LogBG.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+LogBG.BorderColor3 = Color3.fromRGB(0, 0, 0)
+LogBG.BorderSizePixel = 0
+LogBG.Position = UDim2.new(0.239, 0, 0.104, 0)
+LogBG.Size = UDim2.new(0.754, 0, 0.876, 0)
+LogBG.Visible = false
+LogCornerBG.CornerRadius = UDim.new(0.0500000007, 0)
+LogCornerBG.Name = "LogCornerBG"
+LogCornerBG.Parent = LogBG
+LogScrollingFrame.Name = "LogScrollingFrame"
+LogScrollingFrame.Parent = LogBG
+LogScrollingFrame.Active = true
+LogScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+LogScrollingFrame.BackgroundTransparency = 1.000
+LogScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+LogScrollingFrame.BorderSizePixel = 0
+LogScrollingFrame.Position = UDim2.new(0.0647460222, 0, 0.165985808, 0)
+LogScrollingFrame.Size = UDim2.new(0.867271066, 0, 0.546884477, 0)
+LogUIGridLayout.Parent = LogScrollingFrame
+LogUIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+LogUIGridLayout.CellPadding = UDim2.new(0, 0, 0, 0)
+LogUIGridLayout.CellSize = UDim2.new(1, 0, 0, 50)
+LogTitle.Name = "LogTitle"
+LogTitle.Parent = LogBG
+LogTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+LogTitle.BackgroundTransparency = 1.000
+LogTitle.BorderColor3 = Color3.fromRGB(0, 0, 0)
+LogTitle.BorderSizePixel = 0
+LogTitle.Position = UDim2.new(-4.93971832e-08, 0, 1.94826217e-08, 0)
+LogTitle.Size = UDim2.new(1.00000012, 0, 0.146373823, 0)
+LogTitle.Font = Enum.Font.DenkOne
+LogTitle.Text = "Log"
+LogTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+LogTitle.TextScaled = true
+LogTitle.TextSize = 14.000
+LogTitle.TextWrapped = true
+LogTitle.TextXAlignment = Enum.TextXAlignment.Left
+ClearCache.Name = "ClearCache"
+ClearCache.Parent = LogBG
+ClearCache.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+ClearCache.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ClearCache.BorderSizePixel = 0
+ClearCache.Position = UDim2.new(0.166720778, 0, 0.796731532, 0)
+ClearCache.Size = UDim2.new(0.666526437, 0, 0.130643517, 0)
+ClearCache.Font = Enum.Font.FredokaOne
+ClearCache.Text = "Clear cache"
+ClearCache.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClearCache.TextScaled = true
+ClearCache.TextSize = 14.000
+ClearCache.TextWrapped = true
+ClearCacheCorner.CornerRadius = UDim.new(0.300000012, 0)
+ClearCacheCorner.Name = "ClearCacheCorner"
+ClearCacheCorner.Parent = ClearCache
+local Scan = Instance.new("ScreenGui")
+local bg = Instance.new("Frame")
+local UIGradient = Instance.new("UIGradient")
+local Key = Instance.new("TextBox")
+local Title = Instance.new("TextLabel")
+local Activate = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local UICorner_2 = Instance.new("UICorner")
+local keycoll = false
+Scan.Name = "Scan"
+Scan.Parent = game.CoreGui
+Scan.IgnoreGuiInset = true
+Scan.Enabled = false
+Scan.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+bg.Name = "bg"
+bg.Parent = Scan
+bg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+bg.BorderColor3 = Color3.fromRGB(0, 0, 0)
+bg.BorderSizePixel = 0
+bg.Position = UDim2.new(0.377189577, 0, 0.158970222, 0)
+bg.Size = UDim2.new(0.245130569, 0, 0.681258202, 0)
+UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(0, 0, 0)), ColorSequenceKeypoint.new(0.48, Color3.fromRGB(123, 123, 123)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(53, 53, 53))}
+UIGradient.Rotation = 90
+UIGradient.Parent = bg
+Key.Name = "Key"
+Key.Parent = bg
+Key.BackgroundColor3 = Color3.fromRGB(54, 54, 54)
+Key.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Key.BorderSizePixel = 0
+Key.Position = UDim2.new(0.0830952749, 0, 0.695864499, 0)
+Key.Size = UDim2.new(0.828355968, 0, 0.100000001, 0)
+Key.Font = Enum.Font.SourceSans
+Key.Text = ""
+Key.TextColor3 = Color3.fromRGB(0, 0, 0)
+Key.TextScaled = true
+Key.TextSize = 14.000
+Key.TextWrapped = true
+Key.ClearTextOnFocus = false
+Key.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Name = "Title"
+Title.Parent = bg
+Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1.000
+Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title.BorderSizePixel = 0
+Title.Position = UDim2.new(0.0311607271, 0, -9.68211253e-08, 0)
+Title.Size = UDim2.new(0.93508172, 0, 0.624542356, 0)
+Title.Font = Enum.Font.Highway
+Title.Text = "To use the plugin, please put in the  key to activate the plugin, without this the plugin is not going to work.\n(the plugin is now public, the key is :"..k..")"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+Title.TextSize = 14.000
+Title.TextWrapped = true
+Activate.Name = "Activate"
+Activate.Parent = bg
+Activate.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+Activate.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Activate.BorderSizePixel = 0
+Activate.Position = UDim2.new(0.0701116323, 0, 0.854496241, 0)
+Activate.Size = UDim2.new(0.85951674, 0, 0.0682736412, 0)
+Activate.Font = Enum.Font.SourceSans
+Activate.Text = "Activate"
+Activate.TextColor3 = Color3.fromRGB(255, 255, 255)
+Activate.TextScaled = true
+Activate.TextSize = 14.000
+Activate.TextWrapped = true
+UICorner.CornerRadius = UDim.new(0.200000003, 0)
+UICorner.Parent = Activate
+UICorner_2.CornerRadius = UDim.new(0.100000001, 0)
+UICorner_2.Parent = bg
+local MainFrame = Instance.new("Frame")
+MainFrame.BorderSizePixel = 0
+MainFrame.Size = UDim2.fromScale(0.754,0.876)
+MainFrame.Position = UDim2.fromScale(0.239,0.104)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.Parent = bgg
+MainFrame.Visible = false
+MainFrame.Name = "MainFrame"
+local ClearButton = Instance.new("TextButton")
+ClearButton.BorderSizePixel = 0
+ClearButton.Size = UDim2.fromScale(0.503,0.1)
+ClearButton.Position = UDim2.fromScale(0.496,0.898)
+ClearButton.BackgroundColor3 = Color3.fromRGB(45,45,45)
+ClearButton.BackgroundTransparency = 1
+ClearButton.TextColor3 = Color3.fromRGB(0,0,0)
+ClearButton.Text = "Clear"
+ClearButton.TextScaled = true
+ClearButton.TextColor3 = Color3.fromRGB(255,0,0)
+ClearButton.Parent = MainFrame
+ClearButton.Name = "Clear"
+local ScanButton = Instance.new("TextButton")
+ScanButton.BorderSizePixel = 0
+ScanButton.Size = UDim2.fromScale(0.496,0.1)
+ScanButton.Position = UDim2.fromScale(0,0.898)
+ScanButton.BackgroundColor3 = Color3.fromRGB(45,45,45)
+ScanButton.BackgroundTransparency = 1
+ScanButton.TextColor3 = Color3.fromRGB(0,0,0)
+ScanButton.Text = "Scan"
+ScanButton.TextScaled = true
+ScanButton.TextColor3 = Color3.fromRGB(0,255,0)
+ScanButton.Parent = MainFrame
+ScanButton.Name = "Scan"
+local Output = Instance.new("ScrollingFrame")
+Output.BorderSizePixel = 0
+Output.Size = UDim2.fromScale(1,0.898)
+Output.Position = UDim2.fromScale(0,0)
+Output.BackgroundColor3 = Color3.fromRGB(45,45,45)
+Output.BackgroundTransparency = 1
+Output.Parent = MainFrame
+Output.ScrollBarThickness = 0
+Output.Name = "Output"
+local Lister = Instance.new("UIListLayout")
+Lister.Parent = Output
+local function PlaySound()
+	if bgsound.IsPlaying then return end
+	bgsound.SoundId = "rbxassetid://119332553930103"
+	bgsound:Play()
+end
+if settingsss["Background music"] == true then
+	PlaySound()
+end
+SelectButton.MouseButton1Click:Connect(function()
+	Scroll.Visible = true
+	MainFrame.Visible = false
+	LogBG.Visible = false
+	weshbgcv.Visible = false
+	WhyTho.Visible = false
+end)
+SelectButton_2.MouseButton1Click:Connect(function()
+	Scroll.Visible = false
+	MainFrame.Visible = false
+	LogBG.Visible = true
+	weshbgcv.Visible = false
+	WhyTho.Visible = false
+end)
+SelectButton_3.MouseButton1Click:Connect(function()
+	Scroll.Visible = false
+	MainFrame.Visible = true
+	LogBG.Visible = false
+	weshbgcv.Visible = false
+	WhyTho.Visible = false
+end)
+selectbutton_3.MouseButton1Click:Connect(function()
+	weshbgcv.Visible = true
+	Scroll.Visible = false
+	MainFrame.Visible = false
+	LogBG.Visible = false
+	WhyTho.Visible = false
+end)
+SelectButton_4.MouseButton1Click:Connect(function()
+	Scroll.Visible = false
+	MainFrame.Visible = false
+	LogBG.Visible = false
+	weshbgcv.Visible = false
+	WhyTho.Visible = true
+end)
+local idkemmove = TweenInfo.new(0.65,Enum.EasingStyle.Linear,Enum.EasingDirection.InOut,0,false,0)
+--([
+SelectButton.MouseLeave:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(255,255,255)}):Play()
+end)
+SelectButton.MouseEnter:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(91, 91, 91)}):Play()
+end)
+SelectButton_2.MouseLeave:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(255,255,255)}):Play()
+end)
+SelectButton_2.MouseEnter:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(91, 91, 91)}):Play()
+end)
+SelectButton_3.MouseLeave:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(255,255,255)}):Play()
+end)
+SelectButton_3.MouseEnter:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(91, 91, 91)}):Play()
+end)
+selectbutton_3.MouseLeave:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(255,255,255)}):Play()
+end)
+selectbutton_3.MouseEnter:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(91, 91, 91)}):Play()
+end)
+SelectButton_4.MouseLeave:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(255,255,255)}):Play()
+end)
+SelectButton_4.MouseEnter:Connect(function()
+	ts:Create(bgim,idkemmove,{["ImageColor3"] = Color3.fromRGB(91, 91, 91)}):Play()
+end)
+--])
+local faster = TweenInfo.new(.4,Enum.EasingStyle.Sine,Enum.EasingDirection.Out)
+bgg.MouseLeave:Connect(function()
+	if settingsss["Animations"] == true then
+		ts:Create(Page,faster,{Position = UDim2.fromScale(-0.3,0.104)}):Play()
+		ts:Create(WhyTho,faster,{Position = UDim2.fromScale(1,0.104)}):Play()
+		ts:Create(weshbgcv,faster,{Position = UDim2.fromScale(1,0.104)}):Play()
+		ts:Create(Scroll,faster,{Position = UDim2.fromScale(1,0.104)}):Play()
+		ts:Create(MainFrame,faster,{Position = UDim2.fromScale(1,0.104)}):Play()
+		ts:Create(LogBG,faster,{Position = UDim2.fromScale(1,0.104)}):Play()
+		ts:Create(User,faster,{Position = UDim2.fromScale(0.011,1)}):Play()
+	end
+end)
+bgg.MouseEnter:Connect(function()
+	ts:Create(Page,faster,{Position = UDim2.fromScale(0.01,0.104)}):Play()
+	ts:Create(WhyTho,faster,{Position = UDim2.fromScale(0.239,0.104)}):Play()
+	ts:Create(weshbgcv,faster,{Position = UDim2.fromScale(0.239,0.104)}):Play()
+	ts:Create(Scroll,faster,{Position = UDim2.fromScale(0.239,0.104)}):Play()
+	ts:Create(MainFrame,faster,{Position = UDim2.fromScale(0.239,0.104)}):Play()
+	ts:Create(LogBG,faster,{Position = UDim2.fromScale(0.239,0.104)}):Play()
+	ts:Create(User,faster,{Position = UDim2.fromScale(0.011,0.88)}):Play()
+end)
+function ErrorSSound()
+	task.spawn(function()
+		local sous = Instance.new("Sound",spw)
+		sous.SoundId = "rbxassetid://2865228021"
+		sous.Volume = 1
+		sous:Play()
+		sous.Ended:Wait()
+		sous:Destroy()
+	end)
+end
+local function LoadUserData(tbl)
+	print(stt(tbl))
+	warn("Wrong data.")
+	ErrorSSound()
+end
+WhyThoEditText.Text = plugin:GetSetting("Current_Mod") or ""
+WhyThoEditText.Changed:Connect(function()
+	WhyThoColorText.Text = colorLuaTableString(WhyThoEditText.Text)
+end)
+WhyThoSaveButton.MouseButton1Click:Connect(function()
+	plugin:SetSetting("Current_Mod",WhyThoEditText.Text)
+	LoadUserData(WhyThoEditText.Text)
+end)
+if settingsss["Use mode configuration"] == true then
+	local tbl = plugin:GetSetting("Current_Mod") or ""
+	LoadUserData(tbl)
+end
+Close.MouseButton1Click:Connect(function()
+	Anti_Virus_Menu.Enabled = false
+end)
+ClearCache.MouseButton1Click:Connect(function()
+	CreateCacheFolder()
+	if activate then
+		for _,val in game.ServerStorage["81396126331815_AntiVirus_Cache"]:GetChildren() do
+			if val:IsA("StringValue") then
+				val:Destroy()
+			end
+			task.wait()
+		end
+	end
+end)
+Activate.MouseButton1Click:Connect(function()
+	if not activate then
+		if not keycoll then
+			keycoll = true
+			if Key.Text == k then
+				activate = true
+				Scan.Enabled = false
+				Anti_Virus_Menu.Enabled = true
+				warning.Visible = false
+				TerminalBG.Visible = true
+			else
+				Activate.Text = "Not a valid key"
+				wait(0.5)
+				Activate.Text = "Activate"
+			end
+			keycoll = false
+		end
+	end
+end)
+local function parsePath(pathString)
+	local pathParts = {}
+	for part in pathString:gmatch("[^%.%[]+") do
+		part = part:gsub("[\"'%]]", ""):gsub("^%s+", ""):gsub("%s+$", "")
+		if part ~= "" then
+			table.insert(pathParts, part)
+		end
+	end
+	return pathParts
+end
+local function followPath(startObj, pathTable)
+	local current = startObj
+	for i = 2, #pathTable do
+		if typeof(current) == "Instance" and current:FindFirstChild(pathTable[i]) then
+			current = current[pathTable[i]]
+		else
+			return nil
+		end
+	end
+	return current
+end
+function CheckScript(sc)
+	if activate then
+		if not dobreakcoroutine then
+			Create("Checking script :"..sc.Name.. " at :".. sc:GetFullName())
+			task.spawn(function()
+				for _, word in ipairs(badword) do
+					if sc.Source:find(word) then
+						CreateError(sc, Output)
+					end
+					task.wait()
+				end
+				for id in sc.Source:gmatch("re".."qu".."ire%s*%((.-)%)") do
+					if tonumber(id) then
+						if mps:GetProductInfo(id).AssetTypeId == 10 then
+							Create("This script requires a module script, Roblox wont allow me to use something to load the required script so I will just flag it as a virus, also please follow me and favorite the plugin, it really helps me get verified")
+							CreateError(sc, Output)
+						end
+					end
+					if type(id) == "string" and not tonumber(id) then
+						Create("String")
+						local s = parsePath(id)
+						Create(s)
+						local lastin = followPath(sc,s)
+						Create(lastin)
+						if not (lastin:IsA("NumberValue") or lastin:IsA("IntValue") or lastin:IsA("StringValue")) then
+							if tonumber(lastin.Name) then
+								if mps:GetProductInfo(lastin.Name).AssetTypeId == 10 then
+									CreateError(sc, Output)
+								end
+							end
+						else
+							if tonumber(lastin.Value) then
+								if mps:GetProductInfo(lastin.Value).AssetTypeId == 10 then
+									CreateError(sc, Output)
+								end
+							end
+						end
+					end
+				end
+			end)
+		end
+	end
+end
+local function IsAScript(inst:Instance)
+	if string.sub(inst:GetFullName(),1,7) == "CoreGui" then
+	else
+		if inst:IsA("Script") then
+			return true
+		end
+		if inst:IsA("ModuleScript") then
+			return true
+		end
+		if inst:IsA("LocalScript") then
+			return true
+		end
+	end
+end
+local function CheckViruses()
+	if activate then
+		if cooldown == false then
+			cooldown = true
+			Create("Checking viruses.")
+			for _,kk in pairs(Output:GetChildren()) do
+				if kk:IsA("Frame") then
+					kk:Destroy()
+				end
+			end
+			for _,Scr2Chk in pairs(game:GetDescendants()) do
+				if IsAScript(Scr2Chk) then
+					CheckScript(Scr2Chk)
+				end
+			end
+			cooldown = false
+		end
+	end
+end
+game.DescendantAdded:Connect(function(obj)
+	if IsAScript(obj) then
+		if settingsss["Check script that are added"] == true then
+			Create("New script added, checking the script.")
+			CheckScript(obj)
+		end
+	end
+end)
+ScanButton.MouseButton1Click:Connect(function()
+	if activate then
+		CheckViruses()
+	else
+		brick()
+	end
+end)
+ClearButton.MouseButton1Click:Connect(function()
+	if activate then
+		if cooldown == false then
+			for _,k in pairs(Output:GetChildren()) do
+				if k:IsA("Frame") then
+					k:Destroy()
+				end
+			end
+		end
+	end
+end)
+debuggingbutton.Click:Connect(function()
+	debuh.Enabled = not debuh.Enabled
+end)
+scriptd.Click:Connect(function()
+	if activate then
+		Anti_Virus_Menu.Enabled = not Anti_Virus_Menu.Enabled
+	else
+		Scan.Enabled = not Scan.Enabled
+	end
+end)
+local function UpdateGrid()
+	Output.CanvasSize = UDim2.new(0,0,0,Lister.AbsoluteContentSize.Y)
+end
+Output.ChildAdded:Connect(UpdateGrid)
+Output.ChildRemoved:Connect(UpdateGrid)
+print(TranslateTextAsync("fr",Activate))
+task.spawn(function()
+	while task.wait(60) do
+		if dobreakcoroutine then
+			break
+		end
+		local letsee = getvers()
+		if letsee == pluginvers then
+			
+		else
+			if letsee == false then
+				bsod()
+			else
+				if settingsss["Warned when new update"] == true then
+					PopUp("Your plugin version is outdated please use new version.")
+				end
+			end
+		end
+	end
+end)
+task.spawn(function()
+	while task.wait(20) do
+		if dobreakcoroutine then
+			break
+		end
+		if settingsss["Real-time protection"] == true then
+			CheckViruses()
+		end
+	end
+end)
+task.spawn(function()
+	while task.wait(3) do
+		if dobreakcoroutine then
+			break
+		end
+		LogScrollingFrame.CanvasSize = UDim2.new(0,0,0,LogUIGridLayout.AbsoluteContentSize.Y)
+		CreateCacheFolder()
+		for _,txt in pairs(LogScrollingFrame:GetChildren()) do
+			if txt:IsA("TextLabel") then
+				txt:Destroy()
+				LogScrollingFrame.CanvasSize = UDim2.new(0,0,0,LogUIGridLayout.AbsoluteContentSize.Y)
+			end
+		end
+		CreateCacheFolder()
+		for _,v in pairs(game.ServerStorage["81396126331815_AntiVirus_Cache"]:GetChildren()) do
+			if v:IsA("StringValue") then
+				local newcachetxt = Instance.new("TextLabel")
+				newcachetxt.Name = "LogTitle"
+				newcachetxt.Parent = LogScrollingFrame
+				newcachetxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				newcachetxt.BackgroundTransparency = 1.000
+				newcachetxt.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				newcachetxt.BorderSizePixel = 0
+				newcachetxt.Position = UDim2.new(-4.93971832e-08, 0, 1.94826217e-08, 0)
+				newcachetxt.Size = UDim2.new(1.00000012, 0, 0.146373823, 0)
+				newcachetxt.Font = Enum.Font.DenkOne
+				newcachetxt.Text = v.Name .. "\n" .. v.Value
+				newcachetxt.TextColor3 = Color3.fromRGB(255, 255, 255)
+				newcachetxt.TextSize = 25
+				newcachetxt.TextXAlignment = Enum.TextXAlignment.Left
+				LogScrollingFrame.CanvasSize = UDim2.new(0,0,0,LogUIGridLayout.AbsoluteContentSize.Y)
+			end
+			task.wait()
+		end
+	end
+end)
+task.spawn(function()
+	while task.wait(0.5) do
+		if settingsss["Background music"] == true then
+			PlaySound()
+		else
+			bgsound:Stop()
+		end
+	end
+end)
+task.spawn(function()
+	local alreadystopping = false
+	while task.wait() do
+		if dobreakcoroutine == true then
+			if not alreadystopping then
+				alreadystopping = true
+				Anti_Virus_Menu:Destroy()
+				Areyounotsure:Destroy()
+				Scan:Destroy()
+				PopUpg:Destroy()
+				debuh:Destroy()
+				spw:Destroy()
+				warn("Plugin destructed.")
+				script.Disabled = true
+				break
+			end
+		end
+	end
+end)
